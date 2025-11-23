@@ -1,0 +1,114 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         UserRole @default(VIEWER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  controlCommands ControlCommand[]
+}
+
+enum UserRole {
+  ADMIN
+  VIEWER
+}
+
+model Device {
+  id           String   @id @default("esp32-001")
+  name         String
+  apiKey       String   @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  statuses        DeviceStatus[]
+  controlCommands ControlCommand[]
+  alertLogs       AlertLog[]
+}
+
+model DeviceStatus {
+  id                  String   @id @default(cuid())
+  deviceId            String
+  waterLevelCm        Float
+  doorState           DoorState
+  mode                DeviceMode
+  pHeavyRainNext24h   Float
+  temperatureC        Float
+  humidityPct         Float
+  timestamp           DateTime
+  createdAt           DateTime @default(now())
+
+  device Device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@index([deviceId, timestamp])
+  @@index([timestamp])
+}
+
+enum DoorState {
+  OPEN
+  MID
+  CLOSE
+}
+
+enum DeviceMode {
+  AUTO
+  MANUAL
+}
+
+model ControlCommand {
+  id              String      @id @default(cuid())
+  deviceId        String
+  command         CommandType
+  requestedByUserId String?
+  createdAt       DateTime    @default(now())
+
+  device Device? @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  requestedBy    User?       @relation(fields: [requestedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([deviceId, createdAt])
+}
+
+enum CommandType {
+  OPEN
+  CLOSE
+  AUTO
+}
+
+model AlertLog {
+  id        String        @id @default(cuid())
+  deviceId  String
+  type      AlertType     @default(TELEGRAM)
+  message   String
+  severity  AlertSeverity @default(INFO)
+  createdAt DateTime      @default(now())
+
+  device Device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@index([deviceId, createdAt])
+}
+
+enum AlertType {
+  TELEGRAM
+  EMAIL
+  SMS
+}
+
+enum AlertSeverity {
+  INFO
+  WARN
+  CRITICAL
+}
+
