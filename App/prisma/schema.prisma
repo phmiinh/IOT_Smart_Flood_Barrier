@@ -15,16 +15,11 @@ model User {
   name         String
   email        String   @unique
   passwordHash String
-  role         UserRole @default(VIEWER)
+  role         String   @default("VIEWER")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   controlCommands ControlCommand[]
-}
-
-enum UserRole {
-  ADMIN
-  VIEWER
 }
 
 model Device {
@@ -43,8 +38,8 @@ model DeviceStatus {
   id                  String   @id @default(cuid())
   deviceId            String
   waterLevelCm        Float
-  doorState           DoorState
-  mode                DeviceMode
+  doorState           String
+  mode                String
   pHeavyRainNext24h   Float
   temperatureC        Float
   humidityPct         Float
@@ -57,21 +52,10 @@ model DeviceStatus {
   @@index([timestamp])
 }
 
-enum DoorState {
-  OPEN
-  MID
-  CLOSE
-}
-
-enum DeviceMode {
-  AUTO
-  MANUAL
-}
-
 model ControlCommand {
   id              String      @id @default(cuid())
   deviceId        String
-  command         CommandType
+  command         String
   requestedByUserId String?
   createdAt       DateTime    @default(now())
 
@@ -81,34 +65,16 @@ model ControlCommand {
   @@index([deviceId, createdAt])
 }
 
-enum CommandType {
-  OPEN
-  CLOSE
-  AUTO
-}
-
 model AlertLog {
   id        String        @id @default(cuid())
   deviceId  String
-  type      AlertType     @default(TELEGRAM)
+  type      String        @default("TELEGRAM")
   message   String
-  severity  AlertSeverity @default(INFO)
+  severity  String        @default("INFO")
   createdAt DateTime      @default(now())
 
   device Device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
 
   @@index([deviceId, createdAt])
-}
-
-enum AlertType {
-  TELEGRAM
-  EMAIL
-  SMS
-}
-
-enum AlertSeverity {
-  INFO
-  WARN
-  CRITICAL
 }
 

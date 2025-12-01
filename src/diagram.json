@@ -72,7 +72,7 @@ int lastKnownChannel = 0;
 //==================== CẤU HÌNH SERVO ====================
 
 // Định nghĩa 4 mức góc mở
-const int ANGLE_OPEN_FULL = 180;   // Mở hết (180°)
+const int ANGLE_OPEN_FULL = 0;    // Mở hết (Nước cao)
 const int ANGLE_OPEN_MID  = 30;   // Mở vừa
 const int ANGLE_CLOSE_MID = 60;   // Khép hờ
 const int ANGLE_CLOSE_FULL= 90;   // Đóng chặt (Nước thấp/An toàn)
